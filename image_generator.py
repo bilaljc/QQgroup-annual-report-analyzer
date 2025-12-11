@@ -89,12 +89,19 @@ class AICommentGenerator:
         
         try:
             from openai import OpenAI
+            import httpx
+            
             self.client = OpenAI(
                 api_key=OPENAI_API_KEY,
-                base_url=OPENAI_BASE_URL
+                base_url=OPENAI_BASE_URL,
+                http_client=httpx.Client(timeout=60.0)  # 增加超时
             )
-        except ImportError:
-            print("⚠️ 需要安装openai库: pip install openai")
+            
+            # 调试信息
+            import os
+            if os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy'):
+                print("🌐 系统代理已自动加载")
+                
         except Exception as e:
             print(f"⚠️ OpenAI客户端初始化失败: {e}")
     
