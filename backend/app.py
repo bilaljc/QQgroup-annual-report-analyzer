@@ -52,7 +52,7 @@ CORS(app, resources={
 })
 
 # 文件上传限制 - 从环境变量读取
-max_size_mb = int(os.getenv('MAX_UPLOAD_SIZE_MB', '50'))
+max_size_mb = int(os.getenv('MAX_UPLOAD_SIZE_MB', '1024'))
 app.config['MAX_CONTENT_LENGTH'] = max_size_mb * 1024 * 1024
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-please-change')
 
