@@ -40,32 +40,6 @@ install_dependencies() {
     echo "✅ 系统依赖安装完成"
 }
 
-# 配置防火墙
-configure_firewall() {
-    echo ""
-    echo "🔥 配置防火墙..."
-    
-    if command -v ufw &> /dev/null; then
-        sudo ufw allow 80/tcp
-        sudo ufw allow 443/tcp
-        sudo ufw allow 22/tcp
-        sudo ufw --force enable || echo "⚠️ 启用 UFW 防火墙失败，请手动检查"
-        echo "✅ UFW 防火墙已配置"
-    elif command -v firewall-cmd &> /dev/null; then
-        # 先检测 firewalld 是否在运行
-        if systemctl is-active --quiet firewalld; then
-            sudo firewall-cmd --permanent --add-service=http || echo "⚠️ 添加 http 服务失败"
-            sudo firewall-cmd --permanent --add-service=https || echo "⚠️ 添加 https 服务失败"
-            sudo firewall-cmd --permanent --add-service=ssh || echo "⚠️ 添加 ssh 服务失败"
-            sudo firewall-cmd --reload || echo "⚠️ 重载 firewalld 失败"
-            echo "✅ Firewalld 防火墙已配置"
-        else
-            echo "⚠️ firewalld 未运行，跳过防火墙配置"
-        fi
-    else
-        echo "⚠️ 未检测到防火墙程序，请手动配置防火墙规则"
-    fi
-}
 
 # 创建部署用户
 create_deploy_user() {
