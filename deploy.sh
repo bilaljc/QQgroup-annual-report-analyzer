@@ -24,13 +24,17 @@ install_dependencies() {
     echo "📦 安装系统依赖..."
     
     if [[ "$OS" == "ubuntu" ]] || [[ "$OS" == "debian" ]]; then
-        sudo apt update
-        sudo apt install -y python3 python3-pip python3-venv nodejs npm nginx certbot python3-certbot-nginx git redis-server mysql-server
+        sudo apt update || echo "⚠️ apt update 失败，继续尝试安装"
+        sudo apt install -y python3 python3-pip python3-venv nodejs npm nginx certbot python3-certbot-nginx git redis-server mysql-server || echo "⚠️ 部分软件包安装失败，请检查"
     elif [[ "$OS" == "centos" ]] || [[ "$OS" == "rhel" ]]; then
-        sudo yum install -y python3 python3-pip nodejs npm nginx certbot python3-certbot-nginx git redis mysql-server
+        sudo yum install -y python3 python3-pip nodejs npm nginx certbot python3-certbot-nginx git redis mysql-server || echo "⚠️ 部分软件包安装失败，请检查"
     else
-        echo "⚠️ 不支持的操作系统，请手动安装依赖"
-        exit 1
+        echo "⚠️ 不支持的操作系统: $OS"
+        echo "请手动安装以下依赖: python3, python3-pip, python3-venv, nodejs, npm, nginx, certbot, git, redis, mysql"
+        read -p "是否继续部署？(y/n): " continue_anyway
+        if [ "$continue_anyway" != "y" ]; then
+            exit 1
+        fi
     fi
     
     echo "✅ 系统依赖安装完成"
@@ -45,16 +49,21 @@ configure_firewall() {
         sudo ufw allow 80/tcp
         sudo ufw allow 443/tcp
         sudo ufw allow 22/tcp
-        sudo ufw --force enable
+        sudo ufw --force enable || echo "⚠️ 启用 UFW 防火墙失败，请手动检查"
         echo "✅ UFW 防火墙已配置"
     elif command -v firewall-cmd &> /dev/null; then
-        sudo firewall-cmd --permanent --add-service=http
-        sudo firewall-cmd --permanent --add-service=https
-        sudo firewall-cmd --permanent --add-service=ssh
-        sudo firewall-cmd --reload
-        echo "✅ Firewalld 防火墙已配置"
+        # 先检测 firewalld 是否在运行
+        if systemctl is-active --quiet firewalld; then
+            sudo firewall-cmd --permanent --add-service=http || echo "⚠️ 添加 http 服务失败"
+            sudo firewall-cmd --permanent --add-service=https || echo "⚠️ 添加 https 服务失败"
+            sudo firewall-cmd --permanent --add-service=ssh || echo "⚠️ 添加 ssh 服务失败"
+            sudo firewall-cmd --reload || echo "⚠️ 重载 firewalld 失败"
+            echo "✅ Firewalld 防火墙已配置"
+        else
+            echo "⚠️ firewalld 未运行，跳过防火墙配置"
+        fi
     else
-        echo "⚠️ 未检测到防火墙，请手动配置"
+        echo "⚠️ 未检测到防火墙程序，请手动配置防火墙规则"
     fi
 }
 
