@@ -235,28 +235,40 @@ class PersonalAnalyzer:
                         self.replied_by[str(sender_uin)] += 1
         
         # 再遍历用户消息，统计用户自己的数据
+        # 先按时间排序用户消息，确保时间计算的准确性
+        user_messages_with_time = []
+        for msg in self.user_messages:
+            timestamp = msg.get('timestamp', '')
+            msg_dt = parse_datetime(timestamp)
+            if msg_dt:
+                user_messages_with_time.append((msg_dt, msg))
+        
+        # 按时间排序
+        user_messages_with_time.sort(key=lambda x: x[0])
+        
+        # 更新用户消息列表为排序后的
+        self.user_messages = [msg for _, msg in user_messages_with_time]
+        
+        # 从排序后的消息中确定最早和最晚时间
+        if user_messages_with_time:
+            self.first_message_time = user_messages_with_time[0][0]
+            self.last_message_time = user_messages_with_time[-1][0]
+            logger.info(f"📅 最早发言: {self.first_message_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(f"📅 最晚发言: {self.last_message_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
         prev_message_text = None
         prev_sender_uin = None
         repeat_chain = []  # 当前复读链
         
-        for i, msg in enumerate(self.user_messages):
+        for i, (msg_dt, msg) in enumerate(user_messages_with_time):
             # 基本统计
             self.total_messages += 1
-            
-            # 时间分析
-            timestamp = msg.get('timestamp', '')
-            msg_dt = parse_datetime(timestamp)
             
             # 重置当前消息的类型标记
             current_msg_has_emoji = False
             current_msg_has_image = False
             
             if msg_dt:
-                if self.first_message_time is None or msg_dt < self.first_message_time:
-                    self.first_message_time = msg_dt
-                if self.last_message_time is None or msg_dt > self.last_message_time:
-                    self.last_message_time = msg_dt
-                
                 # 活跃天数
                 date_str = msg_dt.strftime('%Y-%m-%d')
                 self.active_days.add(date_str)
@@ -368,9 +380,9 @@ class PersonalAnalyzer:
                 self.repeat_count += 1
             
             # 复读链检测（需要检查前后消息）
-            if i > 0 and i < len(self.user_messages) - 1:
-                prev_msg = self.user_messages[i-1]
-                next_msg = self.user_messages[i+1] if i+1 < len(self.user_messages) else None
+            if i > 0 and i < len(user_messages_with_time) - 1:
+                prev_msg = user_messages_with_time[i-1][1]
+                next_msg = user_messages_with_time[i+1][1] if i+1 < len(user_messages_with_time) else None
                 
                 prev_text = clean_text(prev_msg.get('content', {}).get('text', ''), [])
                 next_text = clean_text(next_msg.get('content', {}).get('text', ''), []) if next_msg else None
