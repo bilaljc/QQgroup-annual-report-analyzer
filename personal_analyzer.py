@@ -5,7 +5,11 @@
 """
 
 import re
-import jieba
+# 尝试导入 jieba_fast（更快），如果失败则回退到 jieba（标准版本）
+try:
+    import jieba_fast as jieba
+except ImportError:
+    import jieba
 from datetime import datetime, timezone, timedelta
 from collections import Counter, defaultdict
 from typing import Dict, List, Optional, Tuple
