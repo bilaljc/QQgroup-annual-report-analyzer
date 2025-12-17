@@ -99,50 +99,132 @@ echo [5/9] 安装Python依赖...
 if not exist "venv" (
     echo 创建Python虚拟环境...
     python -m venv venv
-)
-call venv\Scripts\activate.bat
-echo 安装后端依赖包...
-pip install -r backend\requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple >nul 2>&1
-if errorlevel 1 (
-    echo ⚠️  使用清华源安装失败，尝试官方源...
-    pip install -r backend\requirements.txt
+    if errorlevel 1 (
+        echo ❌ 错误：虚拟环境创建失败
+        pause
+        exit /b 1
+    )
 )
 
-:: 检查 jieba_fast 是否安装成功
-echo 检查 jieba_fast 安装状态...
-python -c "import jieba_fast" >nul 2>&1
+:: 激活虚拟环境并验证
+call venv\Scripts\activate.bat
 if errorlevel 1 (
-    echo.
-    echo ⚠️  jieba_fast 安装失败（可能需要 C++ 编译器）
-    echo    正在回退到 jieba（标准版本，功能相同但速度稍慢）...
-    pip install jieba -i https://pypi.tuna.tsinghua.edu.cn/simple >nul 2>&1
+    echo ❌ 错误：虚拟环境激活失败
+    pause
+    exit /b 1
+)
+
+:: 设置虚拟环境中的 Python 和 pip 完整路径（确保使用虚拟环境）
+set VENV_PYTHON=%CD%\venv\Scripts\python.exe
+set VENV_PIP=%CD%\venv\Scripts\pip.exe
+
+:: 验证虚拟环境中的 Python 是否存在
+if not exist "%VENV_PYTHON%" (
+    echo ❌ 错误：虚拟环境中的 Python 不存在：%VENV_PYTHON%
+    echo    请删除 venv 文件夹后重新运行脚本
+    pause
+    exit /b 1
+)
+
+:: 验证虚拟环境中的 pip 是否存在
+if not exist "%VENV_PIP%" (
+    echo ❌ 错误：虚拟环境中的 pip 不存在：%VENV_PIP%
+    echo    请删除 venv 文件夹后重新运行脚本
+    pause
+    exit /b 1
+)
+
+:: 使用虚拟环境中的 Python 验证环境
+echo 验证虚拟环境完整性...
+"%VENV_PYTHON%" --version >nul 2>&1
+if errorlevel 1 (
+    echo ❌ 错误：虚拟环境中的 Python 无法运行
+    pause
+    exit /b 1
+)
+
+:: 检查当前使用的 Python 是否在虚拟环境中
+for /f "tokens=*" %%i in ('where python 2^>nul') do set PYTHON_PATH=%%i
+if defined PYTHON_PATH (
+    echo %PYTHON_PATH% | findstr /i "venv" >nul
     if errorlevel 1 (
-        pip install jieba
+        echo ⚠️  警告：当前 python 命令可能不在虚拟环境中
+        echo    当前路径：%PYTHON_PATH%
+        echo    将强制使用虚拟环境中的 Python：%VENV_PYTHON%
     )
-    echo ✅ 已安装 jieba（标准版本）
-    echo.
-    echo 💡 提示：如果您想使用更快的 jieba_fast，可以：
-    echo    1. 安装 Visual C++ Build Tools（推荐）
-    echo       下载地址：https://visualstudio.microsoft.com/visual-cpp-build-tools/
-    echo       安装时选择 "C++ 生成工具" 工作负载
-    echo    2. 或者直接使用 jieba（已安装，功能相同）
+)
+
+echo ✅ 虚拟环境已激活并验证
+echo    虚拟环境 Python：%VENV_PYTHON%
+echo    虚拟环境 pip：%VENV_PIP%
+echo 安装后端依赖包（使用虚拟环境中的 pip）...
+"%VENV_PIP%" install -r backend\requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple >nul 2>&1
+if errorlevel 1 (
+    echo ⚠️  使用清华源安装失败，尝试官方源...
+    "%VENV_PIP%" install -r backend\requirements.txt
+    if errorlevel 1 (
+        echo ❌ 错误：依赖包安装失败
+        echo    请检查网络连接或手动运行：%VENV_PIP% install -r backend\requirements.txt
+        pause
+        exit /b 1
+    )
+)
+
+:: 验证关键依赖包是否已正确安装（使用虚拟环境中的 Python）
+echo 验证关键依赖包安装状态（使用虚拟环境中的 Python）...
+"%VENV_PYTHON%" -c "import flask; import requests; import jieba_fast" >nul 2>&1
+if errorlevel 1 (
+    echo ⚠️  部分关键依赖包可能未正确安装，正在检查...
+    "%VENV_PYTHON%" -c "import flask" >nul 2>&1
+    if errorlevel 1 (
+        echo ❌ 错误：flask 未安装，正在安装...
+        "%VENV_PIP%" install flask flask-cors flask-limiter
+    )
+    "%VENV_PYTHON%" -c "import requests" >nul 2>&1
+    if errorlevel 1 (
+        echo ❌ 错误：requests 未安装，正在安装...
+        "%VENV_PIP%" install requests
+    )
+    "%VENV_PYTHON%" -c "import jieba_fast" >nul 2>&1
+    if errorlevel 1 (
+        echo ⚠️  jieba_fast 安装失败（可能需要 C++ 编译器）
+        echo    正在回退到 jieba（标准版本，功能相同但速度稍慢）...
+        "%VENV_PIP%" install jieba -i https://pypi.tuna.tsinghua.edu.cn/simple >nul 2>&1
+        if errorlevel 1 (
+            "%VENV_PIP%" install jieba
+        )
+        echo ✅ 已安装 jieba（标准版本）
+        echo.
+        echo 💡 提示：如果您想使用更快的 jieba_fast，可以：
+        echo    1. 安装 Visual C++ Build Tools（推荐）
+        echo       下载地址：https://visualstudio.microsoft.com/visual-cpp-build-tools/
+        echo       安装时选择 "C++ 生成工具" 工作负载
+        echo    2. 或者直接使用 jieba（已安装，功能相同）
+    ) else (
+        echo ✅ jieba_fast 安装成功（高性能版本）
+    )
 ) else (
-    echo ✅ jieba_fast 安装成功（高性能版本）
+    echo ✅ 关键依赖包验证通过（flask, requests, jieba_fast）
 )
 echo ✅ Python依赖安装完成
 
-:: 安装Playwright浏览器
+:: 安装Playwright浏览器（确保在虚拟环境中）
 echo.
 echo [6/9] 检查Playwright浏览器...
-python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); p.chromium.launch(headless=True); p.stop()" >nul 2>&1
+"%VENV_PYTHON%" -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); p.chromium.launch(headless=True); p.stop()" >nul 2>&1
 if errorlevel 1 (
     echo ⚠️  Playwright浏览器未安装，正在安装...
     echo    （首次运行需要下载约100MB，请耐心等待）
-    playwright install chromium
+    echo    使用虚拟环境中的 Python：%VENV_PYTHON%
+    
+    :: 确保使用虚拟环境中的 Python 来运行 playwright
+    "%VENV_PYTHON%" -m playwright install chromium
+    
     if errorlevel 1 (
         echo.
         echo ⚠️  Playwright浏览器安装失败
         echo    图片生成功能可能无法使用，但Web界面仍可正常运行
+        echo    如果问题持续，请手动运行：%VENV_PYTHON% -m playwright install chromium
         echo.
     ) else (
         echo ✅ Playwright浏览器安装完成
@@ -183,8 +265,8 @@ if errorlevel 1 (
     echo 检测到MySQL存储模式
     echo ⚠️  请确保MySQL服务已启动！
     echo.
-    echo 正在检测并初始化MySQL数据库（如需强制重置，请手动运行 "python backend/init_db.py --force"）...
-    python backend\init_db.py
+    echo 正在检测并初始化MySQL数据库（如需强制重置，请手动运行 "%VENV_PYTHON% backend/init_db.py --force"）...
+    "%VENV_PYTHON%" backend\init_db.py
     if errorlevel 1 (
         echo.
         echo ⚠️  MySQL初始化失败！
@@ -201,11 +283,23 @@ if errorlevel 1 (
     )
 )
 
-:: 启动后端
+:: 启动后端（使用虚拟环境中的 Python 完整路径）
 echo.
 echo [9/9] 启动服务...
 echo 正在启动后端服务...
-start "QQ群年度报告-后端" cmd /k "cd /d %CD% && venv\Scripts\activate.bat && python backend\app.py"
+echo    使用虚拟环境 Python：%VENV_PYTHON%
+echo    后端启动命令：%VENV_PYTHON% backend\app.py
+
+:: 验证后端启动所需的模块是否在虚拟环境中
+"%VENV_PYTHON%" -c "import flask; import requests" >nul 2>&1
+if errorlevel 1 (
+    echo ❌ 错误：虚拟环境中缺少关键模块（flask 或 requests）
+    echo    请检查依赖安装是否成功
+    pause
+    exit /b 1
+)
+
+start "QQ群年度报告-后端" cmd /k "cd /d %CD% && %VENV_PYTHON% backend\app.py"
 
 :: 等待后端完全启动（健康检查）
 echo 等待后端服务就绪...
