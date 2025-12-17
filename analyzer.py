@@ -4,7 +4,11 @@ import re
 import random
 import string
 import math
-import jieba_fast as jieba
+# 尝试导入 jieba_fast（更快），如果失败则回退到 jieba（标准版本）
+try:
+    import jieba_fast as jieba
+except ImportError:
+    import jieba
 from collections import Counter, defaultdict
 import config as cfg
 from utils import (
@@ -19,7 +23,13 @@ from logger import get_logger, init_logging
 
 init_logging()
 
-jieba.setLogLevel(jieba.logging.INFO)
+# 设置 jieba 日志级别（jieba_fast 和 jieba 都支持，但标准 jieba 可能没有此方法）
+try:
+    if hasattr(jieba, 'setLogLevel') and hasattr(jieba, 'logging'):
+        jieba.setLogLevel(jieba.logging.INFO)
+except (AttributeError, Exception):
+    # 某些版本的 jieba 可能没有 setLogLevel，忽略错误
+    pass
 
 logger = get_logger('analyzer')
 

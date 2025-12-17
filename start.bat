@@ -107,6 +107,28 @@ if errorlevel 1 (
     echo ⚠️  使用清华源安装失败，尝试官方源...
     pip install -r backend\requirements.txt
 )
+
+:: 检查 jieba_fast 是否安装成功
+echo 检查 jieba_fast 安装状态...
+python -c "import jieba_fast" >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo ⚠️  jieba_fast 安装失败（可能需要 C++ 编译器）
+    echo    正在回退到 jieba（标准版本，功能相同但速度稍慢）...
+    pip install jieba -i https://pypi.tuna.tsinghua.edu.cn/simple >nul 2>&1
+    if errorlevel 1 (
+        pip install jieba
+    )
+    echo ✅ 已安装 jieba（标准版本）
+    echo.
+    echo 💡 提示：如果您想使用更快的 jieba_fast，可以：
+    echo    1. 安装 Visual C++ Build Tools（推荐）
+    echo       下载地址：https://visualstudio.microsoft.com/visual-cpp-build-tools/
+    echo       安装时选择 "C++ 生成工具" 工作负载
+    echo    2. 或者直接使用 jieba（已安装，功能相同）
+) else (
+    echo ✅ jieba_fast 安装成功（高性能版本）
+)
 echo ✅ Python依赖安装完成
 
 :: 安装Playwright浏览器
